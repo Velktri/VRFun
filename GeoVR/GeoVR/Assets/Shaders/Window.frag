@@ -1,4 +1,4 @@
-#version 410 core
+#version 450 core
 uniform sampler2D mytexture;
 noperspective in vec2 v2UV;
 out vec4 outputColor;

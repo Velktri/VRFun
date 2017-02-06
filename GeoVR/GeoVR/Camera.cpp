@@ -12,10 +12,20 @@ Camera::Camera(vr::IVRSystem* InHMD) {
 	SetupStereoRenderTargets();
 
 	ValidPoseCount = 0;
-
 }
 
 Camera::~Camera() {
+	glDeleteRenderbuffers(1, &LeftEyeFrame.m_nDepthBufferId);
+	glDeleteTextures(1, &LeftEyeFrame.m_nRenderTextureId);
+	glDeleteFramebuffers(1, &LeftEyeFrame.m_nRenderFramebufferId);
+	glDeleteTextures(1, &LeftEyeFrame.m_nResolveTextureId);
+	glDeleteFramebuffers(1, &LeftEyeFrame.m_nResolveFramebufferId);
+
+	glDeleteRenderbuffers(1, &RightEyeFrame.m_nDepthBufferId);
+	glDeleteTextures(1, &RightEyeFrame.m_nRenderTextureId);
+	glDeleteFramebuffers(1, &RightEyeFrame.m_nRenderFramebufferId);
+	glDeleteTextures(1, &RightEyeFrame.m_nResolveTextureId);
+	glDeleteFramebuffers(1, &RightEyeFrame.m_nResolveFramebufferId);
 }
 
 FramebufferDesc Camera::GetLeftFrame() {

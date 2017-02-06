@@ -14,6 +14,10 @@ World::~World() {
 	TextureManagement->~TextureManager();
 	AssetManagement->~AssetManager();
 	WorldCamera->~Camera();
+
+	glDeleteVertexArrays(1, &CompanionWindowVAO);
+	glDeleteBuffers(1, &CompanionWindowEBO);
+	glDeleteBuffers(1, &CompanionWindowVBO);
 }
 
 bool World::Init(vr::IVRSystem* InHMD, SDL_Window* InWindow, GLuint InWindowSize_X, GLuint InWindowSize_Y) {
@@ -28,7 +32,7 @@ bool World::Init(vr::IVRSystem* InHMD, SDL_Window* InWindow, GLuint InWindowSize
 	ShaderManagement = new ShaderManager();
 	TextureManagement = new TextureManager();
 	AssetManagement = new AssetManager(ShaderManagement->GetDefaultShader(), HMD);
-	//SetupCompanionWindow();
+	SetupCompanionWindow();
 
 	return true;
 }
@@ -53,7 +57,7 @@ void World::RenderAll() {
 	if (HMD) {
 		//RenderControllerAxes();
 		RenderHMDEyes();
-		//RenderCompanionWindow();
+		RenderCompanionWindow();
 
 		vr::Texture_t leftEyeTexture = { (void*)(uintptr_t) WorldCamera->GetLeftFrame().m_nResolveTextureId, vr::TextureType_OpenGL, vr::ColorSpace_Gamma };
 		vr::VRCompositor()->Submit(vr::Eye_Left, &leftEyeTexture);
@@ -166,19 +170,19 @@ void World::SetupCompanionWindow() {
 	if (!HMD)
 		return;
 
-	std::vector<GLfloat> Verts;
+	std::vector<VertexDataSet> Verts;
 
 	// left eye verts
-	Verts.push_back(-1.0f);		Verts.push_back(-1.0f);		Verts.push_back(0.0f);		Verts.push_back(1.0f);
-	Verts.push_back(0.0f);		Verts.push_back(-1.0f);		Verts.push_back(1.0f);		Verts.push_back(1.0f);
-	Verts.push_back(-1.0f);		Verts.push_back(1.0f);		Verts.push_back(0.0f);		Verts.push_back(0.0f);
-	Verts.push_back(0.0f);		Verts.push_back(1.0f);		Verts.push_back(1.0f);		Verts.push_back(0.0f);
+	Verts.push_back(VertexDataSet(Vector2(-1, -1), Vector2(0, 0)));
+	Verts.push_back(VertexDataSet(Vector2(0, -1), Vector2(1, 0)));
+	Verts.push_back(VertexDataSet(Vector2(-1, 1), Vector2(0, 1)));
+	Verts.push_back(VertexDataSet(Vector2(0, 1), Vector2(1, 1)));
 
 	// right eye verts
-	Verts.push_back(0.0f);		Verts.push_back(-1.0f);		Verts.push_back(0.0f);		Verts.push_back(1.0f);
-	Verts.push_back(1.0f);		Verts.push_back(-1.0f);		Verts.push_back(1.0f);		Verts.push_back(1.0f);
-	Verts.push_back(0.0f);		Verts.push_back(1.0f);		Verts.push_back(0.0f);		Verts.push_back(0.0f);
-	Verts.push_back(1.0f);		Verts.push_back(1.0f);		Verts.push_back(1.0f);		Verts.push_back(0.0f);
+	Verts.push_back(VertexDataSet(Vector2(0, -1), Vector2(0, 0)));
+	Verts.push_back(VertexDataSet(Vector2(1, -1), Vector2(1, 0)));
+	Verts.push_back(VertexDataSet(Vector2(0, 1), Vector2(0, 1)));
+	Verts.push_back(VertexDataSet(Vector2(1, 1), Vector2(1, 1)));
 
 	GLushort vIndices[] = { 0, 1, 3,   0, 3, 2,   4, 5, 7,   4, 7, 6 };
 	CompanionWindowIndexSize = _countof(vIndices);
@@ -188,17 +192,17 @@ void World::SetupCompanionWindow() {
 
 	glGenBuffers(1, &CompanionWindowVBO);
 	glBindBuffer(GL_ARRAY_BUFFER, CompanionWindowVBO);
-	glBufferData(GL_ARRAY_BUFFER, Verts.size() * sizeof(GLfloat), &Verts[0], GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, Verts.size() * sizeof(VertexDataSet), &Verts[0], GL_STATIC_DRAW);
 
 	glGenBuffers(1, &CompanionWindowEBO);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, CompanionWindowEBO);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, CompanionWindowIndexSize * sizeof(GLushort), &vIndices[0], GL_STATIC_DRAW);
 
 	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(GLfloat), (void *) 0);
+	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(VertexDataSet), (void *)offsetof(VertexDataSet, position));
 
 	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(GLfloat), (void *) 2);
+	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(VertexDataSet), (void *)offsetof(VertexDataSet, texCoord));
 
 	glBindVertexArray(0);
 

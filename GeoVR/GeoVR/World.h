@@ -5,6 +5,13 @@
 #include "Models\Grid.h"
 #include "Camera.h"
 
+struct VertexDataSet {
+	Vector2 position;
+	Vector2 texCoord;
+
+	VertexDataSet(const Vector2 & pos, const Vector2 tex) : position(pos), texCoord(tex) {}
+};
+
 class World {
 public:
 	World(bool InVsync);

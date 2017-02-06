@@ -3,10 +3,10 @@
 
 
 VREngine::VREngine() {
-	WindowPos_X = 700;
-	WindowPos_Y = 100;
-	WindowSize_X = 640;
-	WindowSize_Y = 320;
+	WindowPos_X = 400;
+	WindowPos_Y = 200;
+	WindowSize_X = 1280;
+	WindowSize_Y = 640;
 	VSync = false;
 }
 
@@ -71,7 +71,7 @@ bool VREngine::Init() {
 
 	Driver = GetTrackedDeviceString(HMD, vr::k_unTrackedDeviceIndex_Hmd, vr::Prop_TrackingSystemName_String);
 	Display = GetTrackedDeviceString(HMD, vr::k_unTrackedDeviceIndex_Hmd, vr::Prop_SerialNumber_String);
-	SDL_SetWindowTitle(Window, ("hellovr - " + Driver + " " + Display).c_str());
+	SDL_SetWindowTitle(Window, ("GeoVR - " + Driver + " | " + Display).c_str());
 
 	SceneInput = new Input(HMD);
 	SceneWorld = new World(VSync);
